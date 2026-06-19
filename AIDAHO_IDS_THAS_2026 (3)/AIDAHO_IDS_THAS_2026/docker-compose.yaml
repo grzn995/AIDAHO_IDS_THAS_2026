@@ -1,0 +1,39 @@
+version: "3.8"
+
+# ==============================================================================
+# docker-compose.yaml
+#
+# IMPORTANT: This file is a template based on the assignment description.
+# You MUST start from the actual docker-compose.yaml provided in
+#   https://aidaho-edu.uni-hohenheim.de/gitlab/jdvorak/shiny_thas_2026
+# and adapt it -- the skeleton repository likely already defines service
+# names, image tags, and an existing (broken) volume setup that the
+# assignment asks you to fix. Use this file as a reference for the
+# *target* configuration, not as a verbatim drop-in replacement.
+# ==============================================================================
+
+services:
+
+  nginx:
+    image: nginx:stable
+    container_name: thas_nginx
+    ports:
+      - "8080:80"      # map to whatever port your server assigns/allows
+    volumes:
+      - ./nginx_html:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - shiny
+    restart: unless-stopped
+
+  shiny:
+    image: rocker/shiny:latest
+    container_name: thas_shiny
+    # Task 7.1: mount the /shiny folder so changes to app.R (and any helper
+    # files) are picked up inside the container without rebuilding the image.
+    volumes:
+      - ./shiny:/srv/shiny-server
+      - ./01_data:/srv/shiny-server/data:ro
+    ports:
+      - "3838:3838"
+    restart: unless-stopped
